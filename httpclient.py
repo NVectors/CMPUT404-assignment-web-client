@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# Copyright 2016 Abram Hindle, https://github.com/tywtyw2002, and https://github.com/treedust
-# 
+
+# Copyright 2023 Victor Nguyen, Abram Hindle, https://github.com/tywtyw2002, and https://github.com/treedust
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -48,10 +49,10 @@ class HTTPClient(object):
 
     def get_body(self, data):
         return None
-    
+
     def sendall(self, data):
         self.socket.sendall(data.encode('utf-8'))
-        
+
     def close(self):
         self.socket.close()
 
@@ -68,8 +69,35 @@ class HTTPClient(object):
         return buffer.decode('utf-8')
 
     def GET(self, url, args=None):
+        #Temp. place holders
         code = 500
         body = ""
+
+        #https://pymotw.com/3/urllib.parse/
+        parsed_url = urllib.parse.urlparse(url)
+
+        #Check for "HTTP" in the url
+        scheme = parsed_url.scheme
+        if (scheme != "http"):
+            # Return 404 Not Found
+            return HTTPResponse(404, "")
+
+        # Check if port is specified in the url
+        netloc = parsed_url.netloc
+        if (":" in netloc):
+            # Remove port from network location
+            netloc = netloc.split(":")[0]
+
+        # Set port to the default for HTTP
+        port = parsed_url.port
+        if (port == ''):
+            port = 80
+
+        # Check if the path is specified in the url
+        path = parsed_url.path
+        if (path == ''):
+            path="/"
+
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
@@ -82,7 +110,7 @@ class HTTPClient(object):
             return self.POST( url, args )
         else:
             return self.GET( url, args )
-    
+
 if __name__ == "__main__":
     client = HTTPClient()
     command = "GET"
