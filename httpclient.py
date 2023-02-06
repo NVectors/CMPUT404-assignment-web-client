@@ -42,13 +42,24 @@ class HTTPClient(object):
         return None
 
     def get_code(self, data):
-        return None
+        #https://docs.citrix.com/en-us/citrix-adc/current-release/appexpert/http-callout/http-request-response-notes-format.html
+        start_line = data.split("\r\n")[0]
+        status = start_line.split(" ")[1]
+        return int(status)
 
     def get_headers(self,data):
-        return None
+        # https://docs.citrix.com/en-us/citrix-adc/current-release/appexpert/http-callout/http-request-response-notes-format.html
+        # Every line in the response/request ends with a \r\n
+        # There is also a bank line \r\n between the headers and the body
+        headers = data.split("\r\n\r\n")[0]
+        return headers
 
     def get_body(self, data):
-        return None
+        #https://docs.citrix.com/en-us/citrix-adc/current-release/appexpert/http-callout/http-request-response-notes-format.html
+        # Every line in the response/request ends with a \r\n
+        # There is also a bank line \r\n between the headers and the body
+        body = data.split("\r\n\r\n")[1]
+        return body
 
     def sendall(self, data):
         self.socket.sendall(data.encode('utf-8'))
@@ -68,6 +79,25 @@ class HTTPClient(object):
                 done = not part
         return buffer.decode('utf-8')
 
+    def check_parsed_url(self, parsed_url):
+        # Check if port is specified in the url
+        host = parsed_url.netloc
+        if (":" in host):
+            # Remove port from network location
+            host = host.split(":")[0]
+
+        # Set port to the default for HTTP
+        port = parsed_url.port
+        if (port is None):
+            port = 80
+
+        # Check if the path is specified in the url
+        path = parsed_url.path
+        if (path == ''):
+            path="/"
+
+        return host, port, path
+
     def GET(self, url, args=None):
         #Temp. place holders
         code = 500
@@ -82,21 +112,24 @@ class HTTPClient(object):
             # Return 404 Not Found
             return HTTPResponse(404, "")
 
-        # Check if port is specified in the url
-        netloc = parsed_url.netloc
-        if (":" in netloc):
-            # Remove port from network location
-            netloc = netloc.split(":")[0]
+        host,port,path = self.check_parsed_url(parsed_url)
 
-        # Set port to the default for HTTP
-        port = parsed_url.port
-        if (port == ''):
-            port = 80
+        #Connect to socket
+        self.connect(host,port)
 
-        # Check if the path is specified in the url
-        path = parsed_url.path
-        if (path == ''):
-            path="/"
+        # SEND a HTTP GET request to the web server
+        request = ("GET {} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n\r\n").format(path, host)
+        self.sendall(request)
+
+        # Get HTTP Response decoded as a string
+        response = self.recvall(self.socket)
+
+        # Parse string to get status code (as a int) and the message body
+        code = self.get_code(response)
+        body = self.get_body(response)
+
+        # Close socket connection
+        self.close()
 
         return HTTPResponse(code, body)
 
