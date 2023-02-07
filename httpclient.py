@@ -42,20 +42,20 @@ class HTTPClient(object):
         return None
 
     def get_code(self, data):
-        #https://docs.citrix.com/en-us/citrix-adc/current-release/appexpert/http-callout/http-request-response-notes-format.html
+        # Every line in the response/request ends with a \r\n
+        # The start line or message line is always the first header
+        # The status code is always after the HTTP method in the start line
         start_line = data.split("\r\n")[0]
         status = start_line.split(" ")[1]
         return int(status)
 
     def get_headers(self,data):
-        # https://docs.citrix.com/en-us/citrix-adc/current-release/appexpert/http-callout/http-request-response-notes-format.html
         # Every line in the response/request ends with a \r\n
         # There is also a bank line \r\n between the headers and the body
         headers = data.split("\r\n\r\n")[0]
         return headers
 
     def get_body(self, data):
-        #https://docs.citrix.com/en-us/citrix-adc/current-release/appexpert/http-callout/http-request-response-notes-format.html
         # Every line in the response/request ends with a \r\n
         # There is also a bank line \r\n between the headers and the body
         body = data.split("\r\n\r\n")[1]
@@ -67,7 +67,7 @@ class HTTPClient(object):
     def close(self):
         self.socket.close()
 
-    # read everything from the socket
+    # Read everything from the socket
     def recvall(self, sock):
         buffer = bytearray()
         done = False
@@ -79,7 +79,7 @@ class HTTPClient(object):
                 done = not part
         return buffer.decode('utf-8')
 
-    # Parse url to get host, port, path
+    # Parse the given url to get host, port, path
     def check_parsed_url(self, parsed_url):
         # Check if port is specified in the url
         host = parsed_url.netloc
@@ -100,14 +100,9 @@ class HTTPClient(object):
         return host, port, path
 
     def GET(self, url, args=None):
-        # Temp. place holders
-        #code = 500
-        #body = ""
-
-        #https://pymotw.com/3/urllib.parse/
         parsed_url = urllib.parse.urlparse(url)
 
-        # Check for "HTTP" in the url
+        # Check for the "HTTP" in the url
         scheme = parsed_url.scheme
         if (scheme != "http"):
             # Return 404 Not Found
@@ -118,7 +113,7 @@ class HTTPClient(object):
         # Connect to socket
         self.connect(host,port)
 
-        # SEND a HTTP GET request to the web server
+        # Send a HTTP GET request to the web server
         request = ("GET {} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n\r\n").format(path, host)
         self.sendall(request)
 
@@ -139,11 +134,6 @@ class HTTPClient(object):
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
-        #Temp. place holders
-        #code = 500
-        #body = ""
-
-        #https://pymotw.com/3/urllib.parse/
         parsed_url = urllib.parse.urlparse(url)
 
         # Check for "HTTP" in the url
@@ -159,19 +149,15 @@ class HTTPClient(object):
 
         # Check for HTTP Post argument
         if (args is not None):
-            # https://www.cs.unb.ca/~bremner/teaching/cs2613/books/python3-doc/library/urllib.parse.html#urllib.parse.urlencode
             body = urllib.parse.urlencode(args)
 
-            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
-            # SEND a HTTP POST request to the web server
+            # SEND a HTTP POST request to the web server with message body
             content_type = "application/x-www-form-urlencoded"
             request = ("POST {} HTTP/1.1\r\nHost: {}\r\n").format(path, host)
-            # https://www.rfc-editor.org/rfc/rfc9110.html#section-8.3-4
             request += ("Content-Type: {}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}\r\n").format(content_type, str(len(body)), body)
             self.sendall(request)
         else:
-            # SEND a HTTP GET request to the web server
-            # https://www.rfc-editor.org/rfc/rfc9110.html#section-8.3-4
+            # Send a HTTP GET request to the web server
             request = ("POST {} HTTP/1.1\r\nHost: {}\r\n").format(path, host)
             request += ("Content-Length: 0\r\nConnection: close\r\n\r\n")
             self.sendall(request)
