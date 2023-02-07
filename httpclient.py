@@ -99,14 +99,14 @@ class HTTPClient(object):
         return host, port, path
 
     def GET(self, url, args=None):
-        #Temp. place holders
-        code = 500
-        body = ""
+        # Temp. place holders
+        #code = 500
+        #body = ""
 
         #https://pymotw.com/3/urllib.parse/
         parsed_url = urllib.parse.urlparse(url)
 
-        #Check for "HTTP" in the url
+        # Check for "HTTP" in the url
         scheme = parsed_url.scheme
         if (scheme != "http"):
             # Return 404 Not Found
@@ -114,7 +114,7 @@ class HTTPClient(object):
 
         host,port,path = self.check_parsed_url(parsed_url)
 
-        #Connect to socket
+        # Connect to socket
         self.connect(host,port)
 
         # SEND a HTTP GET request to the web server
@@ -131,11 +131,39 @@ class HTTPClient(object):
         # Close socket connection
         self.close()
 
+        # As a user print result to sdout
+        print(response)
+
+        # As a developer return result
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
+        #Temp. place holders
         code = 500
         body = ""
+
+        #https://pymotw.com/3/urllib.parse/
+        parsed_url = urllib.parse.urlparse(url)
+
+        # Check for "HTTP" in the url
+        scheme = parsed_url.scheme
+        if (scheme != "http"):
+            # Return 404 Not Found
+            return HTTPResponse(404, "")
+
+        host,port,path = self.check_parsed_url(parsed_url)
+
+        # Connect to socket
+        self.connect(host,port)
+
+
+        # Close socket connection
+        self.close()
+
+        # As a user print result to sdout
+        #print(response)
+
+        # As a developer return result
         return HTTPResponse(code, body)
 
     def command(self, url, command="GET", args=None):
