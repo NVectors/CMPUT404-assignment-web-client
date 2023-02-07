@@ -79,6 +79,7 @@ class HTTPClient(object):
                 done = not part
         return buffer.decode('utf-8')
 
+    # Parse url to get host, port, path
     def check_parsed_url(self, parsed_url):
         # Check if port is specified in the url
         host = parsed_url.netloc
@@ -139,8 +140,8 @@ class HTTPClient(object):
 
     def POST(self, url, args=None):
         #Temp. place holders
-        code = 500
-        body = ""
+        #code = 500
+        #body = ""
 
         #https://pymotw.com/3/urllib.parse/
         parsed_url = urllib.parse.urlparse(url)
@@ -156,12 +157,37 @@ class HTTPClient(object):
         # Connect to socket
         self.connect(host,port)
 
+        # Check for HTTP Post argument
+        if (args is not None):
+            # https://www.cs.unb.ca/~bremner/teaching/cs2613/books/python3-doc/library/urllib.parse.html#urllib.parse.urlencode
+            body = urllib.parse.urlencode(args)
+
+            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST
+            # SEND a HTTP POST request to the web server
+            content_type = "application/x-www-form-urlencoded"
+            request = ("POST {} HTTP/1.1\r\nHost: {}\r\n").format(path, host)
+            # https://www.rfc-editor.org/rfc/rfc9110.html#section-8.3-4
+            request += ("Content-Type: {}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}\r\n").format(content_type, str(len(body)), body)
+            self.sendall(request)
+        else:
+            # SEND a HTTP GET request to the web server
+            # https://www.rfc-editor.org/rfc/rfc9110.html#section-8.3-4
+            request = ("POST {} HTTP/1.1\r\nHost: {}\r\n").format(path, host)
+            request += ("Content-Length: 0\r\nConnection: close\r\n\r\n")
+            self.sendall(request)
+
+        # Get HTTP Response decoded as a string
+        response = self.recvall(self.socket)
+
+        # Parse string to get status code (as a int) and the message body
+        code = self.get_code(response)
+        body = self.get_body(response)
 
         # Close socket connection
         self.close()
 
         # As a user print result to sdout
-        #print(response)
+        print(response)
 
         # As a developer return result
         return HTTPResponse(code, body)
