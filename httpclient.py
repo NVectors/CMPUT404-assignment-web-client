@@ -114,6 +114,11 @@ class HTTPClient(object):
 
         host,port,path = self.check_parsed_url(parsed_url)
 
+        # Not sure if args is being tested for GET
+        #if args is not None:
+        #    for arg, val in args.items():
+        #        path += ('?{}={}').format(arg,val)
+
         # Connect to socket
         self.connect(host,port)
 
