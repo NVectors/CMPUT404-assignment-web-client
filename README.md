@@ -20,10 +20,10 @@ compatible) http://docs.python.org/2/library/socketserver.html
 
 * Victor Nguyen
 
-References
-[Format of HTTP request/reponse](https://docs.citrix.com/en-us/citrix-adc/current-release/appexpert/http-callout/http-request-response-notes-format.html)
-[Parsing with urllib.parse](https://pymotw.com/3/urllib.parse/)
-[Encoding with urllib.parse](https://www.cs.unb.ca/~bremner/teaching/cs2613/books/python3-doc/library/urllib.parse.html#urllib.parse.urlencode)
-[Format of HTTP Post](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST)
-[Rules on content type](https://www.rfc-editor.org/rfc/rfc9110.html#section-8.3-4)
-[Rules on content length](https://www.rfc-editor.org/rfc/rfc9110.html#section-8.3-4)
+References <br>
+[Format of HTTP request/reponse](https://docs.citrix.com/en-us/citrix-adc/current-release/appexpert/http-callout/http-request-response-notes-format.html)<br>
+[Parsing with urllib.parse](https://pymotw.com/3/urllib.parse/)<br>
+[Encoding with urllib.parse](https://www.cs.unb.ca/~bremner/teaching/cs2613/books/python3-doc/library/urllib.parse.html#urllib.parse.urlencode)<br>
+[Format of HTTP Post](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST)<br>
+[Rules on content type](https://www.rfc-editor.org/rfc/rfc9110.html#section-8.3-4)<br>
+[Rules on content length](https://www.rfc-editor.org/rfc/rfc9110.html#section-8.3-4)<br>
