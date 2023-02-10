@@ -97,6 +97,10 @@ class HTTPClient(object):
         if (path == ''):
             path="/"
 
+        # Check if the path has parameters
+        if parsed_url.query is not None:
+            path += ('?' + parsed_url.query)
+
         return host, port, path
 
     def GET(self, url, args=None):
@@ -114,7 +118,7 @@ class HTTPClient(object):
         self.connect(host,port)
 
         # Send a HTTP GET request to the web server
-        request = ("GET {} HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n\r\n").format(path, host)
+        request = ("GET {} HTTP/1.1\r\nHost: {}:{}\r\nConnection: close\r\n\r\n").format(path, host, port)
         self.sendall(request)
 
         # Get HTTP Response decoded as a string
@@ -153,12 +157,12 @@ class HTTPClient(object):
 
             # SEND a HTTP POST request to the web server with message body
             content_type = "application/x-www-form-urlencoded"
-            request = ("POST {} HTTP/1.1\r\nHost: {}\r\n").format(path, host)
+            request = ("POST {} HTTP/1.1\r\nHost: {}:{}\r\n").format(path, host, port)
             request += ("Content-Type: {}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}\r\n").format(content_type, str(len(body)), body)
             self.sendall(request)
         else:
             # Send a HTTP GET request to the web server
-            request = ("POST {} HTTP/1.1\r\nHost: {}\r\n").format(path, host)
+            request = ("POST {} HTTP/1.1\r\nHost: {}:{}\r\n").format(path, host, port)
             request += ("Content-Length: 0\r\nConnection: close\r\n\r\n")
             self.sendall(request)
 
